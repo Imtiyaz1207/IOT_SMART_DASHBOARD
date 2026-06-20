@@ -76,26 +76,19 @@ mqtt_client.on_message = on_message
 '''mqtt_client.connect(MQTT_BROKER, MQTT_PORT, 60)
 mqtt_client.loop_start()'''
 
-def start_mqtt():
+try:
+    mqtt_client.connect(
+        MQTT_BROKER,
+        MQTT_PORT,
+        60
+    )
 
-    try:
+    mqtt_client.loop_start()
 
-        mqtt_client.connect(
-            MQTT_BROKER,
-            MQTT_PORT,
-            60
-        )
+    print("MQTT STARTED")
 
-        mqtt_client.loop_start()
-
-        print("MQTT STARTED")
-
-    except Exception as e:
-
-        print(
-            "MQTT ERROR:",
-            e
-        )
+except Exception as e:
+    print("MQTT ERROR:", e)
 # ---------------- Routes ----------------
 
 @app.route('/')
@@ -179,7 +172,7 @@ def ble():
 
 if __name__ == '__main__':
     app.run(
-        host="0.0.0.0",
-        port=int(os.environ.get("PORT",5000)),
-        debug=False
-    )
+    host="0.0.0.0",
+    port=5000,
+    debug=False
+)
