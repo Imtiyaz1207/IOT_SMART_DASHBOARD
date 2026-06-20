@@ -11,10 +11,10 @@ app = Flask(__name__)
 MQTT_BROKER = "broker.hivemq.com"
 MQTT_PORT = 1883
 
-ACTION_TOPIC = "iot/home/actions"
-STATUS_TOPIC = "iot/home/status"
-ACK_TOPIC = "iot/home/system_ack"
-OTA_TOPIC = "iot/home/ota"
+ACTION_TOPIC = "shaik/home/actions"
+STATUS_TOPIC = "shaik/home/status"
+ACK_TOPIC = "shaik/home/system_ack"
+OTA_TOPIC = "shaik/home/ota"
 
 ota_progress = 0
 
@@ -76,19 +76,26 @@ mqtt_client.on_message = on_message
 '''mqtt_client.connect(MQTT_BROKER, MQTT_PORT, 60)
 mqtt_client.loop_start()'''
 
-try:
-    mqtt_client.connect(
-        MQTT_BROKER,
-        MQTT_PORT,
-        60
-    )
+def start_mqtt():
 
-    mqtt_client.loop_start()
+    try:
 
-    print("MQTT STARTED")
+        mqtt_client.connect(
+            MQTT_BROKER,
+            MQTT_PORT,
+            60
+        )
 
-except Exception as e:
-    print("MQTT ERROR:", e)
+        mqtt_client.loop_start()
+
+        print("MQTT STARTED")
+
+    except Exception as e:
+
+        print(
+            "MQTT ERROR:",
+            e
+        )
 # ---------------- Routes ----------------
 
 @app.route('/')
@@ -171,8 +178,11 @@ def ble():
 
 
 if __name__ == '__main__':
+
+    start_mqtt()
+
     app.run(
-    host="0.0.0.0",
-    port=5000,
-    debug=False
-)
+        host="0.0.0.0",
+        port=5000,
+        debug=False
+    )
