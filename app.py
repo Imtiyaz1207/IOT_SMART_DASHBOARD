@@ -11,10 +11,10 @@ app = Flask(__name__)
 MQTT_BROKER = "broker.hivemq.com"
 MQTT_PORT = 1883
 
-ACTION_TOPIC = "iot/smarttank/actions"
-STATUS_TOPIC = "iot/smarttank/status"
-ACK_TOPIC = "iot/smarttank/system_ack"
-OTA_TOPIC = "iot/smarttank/ota"
+ACTION_TOPIC = "iot/home/actions"
+STATUS_TOPIC = "iot/home/status"
+ACK_TOPIC = "iot/home/system_ack"
+OTA_TOPIC = "iot/home/ota"
 
 ota_progress = 0
 
