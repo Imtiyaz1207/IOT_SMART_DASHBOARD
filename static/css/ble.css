@@ -1,0 +1,234 @@
+
+:root{
+    --bg:#070b14;
+    --card:rgba(20, 28, 45, 0.75);
+    --border:rgba(255,255,255,0.08);
+    --accent:#00d4ff;
+    --accent2:#0099ff;
+    --text:#ffffff;
+    --muted:#94a3b8;
+    --success:#22c55e;
+    --danger:#ef4444;
+}
+
+/* RESET */
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family: 'Segoe UI', sans-serif;
+}
+
+body{
+    min-height:100vh;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    background:
+    radial-gradient(circle at top, #1b3a6b 0%, transparent 50%),
+    radial-gradient(circle at bottom, #001a33 0%, transparent 50%),
+    var(--bg);
+
+    padding:16px;
+    -webkit-tap-highlight-color: transparent;
+}
+
+/* CONTAINER */
+.container{
+    width:100%;
+    max-width:450px;
+}
+
+/* HEADER */
+.header{
+    text-align:center;
+    margin-bottom:20px;
+}
+
+.logo{
+    width:70px;
+    height:70px;
+    margin:0 auto 10px;
+
+    border-radius:50%;
+    background:linear-gradient(135deg,var(--accent),var(--accent2));
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    font-size:30px;
+
+    box-shadow:0 0 20px rgba(0,212,255,0.4);
+}
+
+h1{
+    color:white;
+    font-size:22px;
+    margin-bottom:5px;
+}
+
+.subtitle{
+    color:var(--muted);
+    font-size:13px;
+}
+
+/* BUTTONS */
+button{
+    width:100%;
+    padding:14px;
+    border:none;
+    border-radius:14px;
+
+    font-size:15px;
+    font-weight:600;
+
+    cursor:pointer;
+    transition:0.25s;
+}
+
+/* SCAN */
+#scanBtn{
+    background:linear-gradient(135deg,var(--accent),var(--accent2));
+    color:#001018;
+    margin-bottom:15px;
+}
+
+#scanBtn:active{
+    transform:scale(0.98);
+}
+
+/* CARD */
+.card{
+    background:var(--card);
+    backdrop-filter:blur(18px);
+
+    border:1px solid var(--border);
+    border-radius:18px;
+
+    padding:18px;
+    margin-bottom:15px;
+
+    box-shadow:0 8px 25px rgba(0,0,0,0.3);
+
+    /* ⭐ ADDED FIX */
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+}
+/* CARD TITLE */
+.card h3{
+    color:var(--accent);
+    margin-bottom:12px;
+    text-align:center;
+    font-size:16px;
+}
+
+/* ROW */
+.row{
+    display:flex;
+    justify-content:space-between;
+    margin:10px 0;
+}
+
+.label{
+    color:var(--muted);
+    font-size:13px;
+}
+
+.value{
+    color:white;
+    font-weight:600;
+}
+
+/* STATUS */
+.disconnected{
+    color:var(--danger);
+}
+
+/* INPUT */
+input{
+    width:100%;
+    padding:14px;
+    margin-top:12px;
+
+    border-radius:12px;
+    border:1px solid var(--border);
+
+    background:rgba(10,18,32,0.9);
+    color:white;
+
+    font-size:15px;
+
+    outline:none;
+}
+
+input:focus{
+    border-color:var(--accent);
+    box-shadow:0 0 12px rgba(0,212,255,0.25);
+}
+
+/* SEND BUTTON */
+#sendBtn{
+    margin-top:14px;
+    background:linear-gradient(135deg,#22c55e,#16a34a);
+    color:white;
+}
+
+#sendBtn:active{
+    transform:scale(0.98);
+}
+
+/* 📱 MOBILE OPTIMIZED */
+@media (max-width: 600px){
+
+    body{
+        padding:10px;
+    }
+
+    .container{
+        max-width:100%;
+    }
+
+    h1{
+        font-size:20px;
+    }
+
+    .card{
+        padding:16px;
+        border-radius:16px;
+    }
+
+    button{
+        font-size:14px;
+        padding:14px;
+    }
+
+    input{
+        font-size:14px;
+        padding:13px;
+    }
+}
+.backBtn{
+    width:100%;
+    padding:14px;
+    border-radius:12px;
+
+    background:rgba(255,255,255,0.08);
+    color:white;
+
+    border:1px solid rgba(255,255,255,0.1);
+
+    margin-top:6px;
+
+    transition:0.2s ease;
+}
+
+button:active{
+    transform:scale(0.98);
+}
+
+.backBtn:hover{
+    background:rgba(0,212,255,0.2);
+    box-shadow:0 0 15px rgba(0,212,255,0.3);
+}

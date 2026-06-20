@@ -1,0 +1,1799 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Smart Tank IoT Dashboard</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+
+:root{
+
+--bg:#020617;
+
+--glass:
+rgba(15,23,42,0.72);
+
+--glass-light:
+rgba(30,41,59,0.55);
+
+
+--border:
+rgba(255,255,255,0.12);
+
+
+--primary:#38bdf8;
+
+--success:#22c55e;
+
+--danger:#ef4444;
+
+--orange:#f97316;
+
+--purple:#a855f7;
+
+
+--text:#f8fafc;
+
+--muted:#94a3b8;
+
+
+}
+
+
+
+*{
+
+
+margin:0;
+
+padding:0;
+
+box-sizing:border-box;
+
+
+font-family:'Poppins',sans-serif;
+
+
+}
+
+
+
+
+body{
+
+
+min-height:100vh;
+
+
+padding:30px;
+
+
+color:var(--text);
+
+
+
+background:
+
+
+radial-gradient(
+circle at 10% 10%,
+#1d4ed8,
+transparent 30%
+),
+
+
+radial-gradient(
+circle at 90% 20%,
+#7c3aed,
+transparent 25%
+),
+
+
+linear-gradient(
+135deg,
+#020617,
+#0f172a
+);
+
+
+}
+
+
+
+/* ================= HEADER ================= */
+
+
+
+.header{
+
+
+display:flex;
+
+
+justify-content:space-between;
+
+
+align-items:center;
+
+
+padding:30px;
+
+
+
+background:var(--glass);
+
+
+backdrop-filter:blur(25px);
+
+
+
+border:
+
+1px solid var(--border);
+
+
+
+border-radius:30px;
+
+
+
+box-shadow:
+
+
+0 25px 60px rgba(0,0,0,.45);
+
+
+
+margin-bottom:35px;
+
+
+}
+
+
+
+.header h1{
+
+
+font-size:36px;
+
+
+font-weight:700;
+
+
+letter-spacing:.5px;
+
+
+background:
+
+linear-gradient(
+90deg,
+#38bdf8,
+#a78bfa
+);
+
+
+-webkit-background-clip:text;
+
+color:transparent;
+
+
+
+}
+
+
+
+/* ONLINE STATUS */
+
+
+.device-status{
+
+
+display:flex;
+
+
+align-items:center;
+
+
+gap:12px;
+
+
+font-size:18px;
+
+
+}
+
+
+
+.online-dot{
+
+
+height:15px;
+
+width:15px;
+
+
+background:#22c55e;
+
+
+border-radius:50%;
+
+
+box-shadow:
+
+0 0 20px #22c55e;
+
+
+animation:pulse 1.5s infinite;
+
+
+
+}
+
+
+
+@keyframes pulse{
+
+
+50%{
+
+
+transform:scale(1.4);
+
+
+opacity:.5;
+
+
+}
+
+
+}
+
+
+
+
+
+/* ================= GRID ================= */
+
+
+.dashboard{
+
+display:flex;
+
+flex-direction:row;
+
+gap:30px;
+
+align-items:stretch;
+
+}
+
+
+.card{
+
+background:
+
+linear-gradient(
+145deg,
+rgba(15,23,42,.85),
+rgba(2,6,23,.85)
+);
+
+backdrop-filter:blur(25px);
+
+border:
+
+1px solid var(--border);
+
+border-radius:30px;
+
+padding:30px;
+
+box-shadow:
+
+0 25px 70px rgba(0,0,0,.35);
+
+transition:.35s;
+
+
+/* important */
+
+flex:1;
+
+min-width:0;
+
+height:auto;
+
+}
+
+/* CARD SIZE CONTROL */
+
+.dashboard .card:nth-child(1){
+
+flex:1.1;
+
+}
+
+
+.dashboard .card:nth-child(2){
+
+flex:1;
+
+}
+
+
+.dashboard .card:nth-child(3){
+
+flex:.9;
+
+}
+
+
+
+
+/* align buttons bottom */
+
+.card button{
+
+margin-top:10px;
+
+}
+
+
+
+/* ACK spacing */
+
+.ack-card{
+
+min-height:280px;
+
+display:flex;
+
+flex-direction:column;
+
+justify-content:center;
+
+}
+
+.card:hover{
+
+
+transform:translateY(-8px);
+
+
+box-shadow:
+
+
+0 35px 80px rgba(0,0,0,.55);
+
+
+
+}
+
+
+
+.card h2{
+
+
+font-size:26px;
+
+
+margin-bottom:25px;
+
+
+color:var(--primary);
+
+
+
+display:flex;
+
+
+align-items:center;
+
+
+gap:10px;
+
+
+
+}
+
+
+
+
+hr{
+
+
+border:none;
+
+
+height:1px;
+
+
+background:
+
+rgba(255,255,255,.1);
+
+
+margin:20px 0;
+
+
+
+}
+
+
+
+
+
+/* ================= STATUS ================= */
+
+
+
+.status-grid{
+
+
+display:grid;
+
+
+grid-template-columns:
+
+repeat(2,1fr);
+
+
+
+gap:20px;
+
+
+}
+
+
+
+
+
+.status-box{
+
+
+background:
+
+
+rgba(2,6,23,.9);
+
+
+
+border-radius:25px;
+
+
+padding:28px;
+
+
+
+text-align:center;
+
+
+
+border:
+
+1px solid rgba(255,255,255,.08);
+
+
+
+transition:.3s;
+
+
+
+}
+
+
+
+.status-box:hover{
+
+
+transform:scale(1.04);
+
+
+background:
+
+rgba(15,23,42,.9);
+
+
+}
+
+
+
+
+.status-title{
+
+
+color:var(--muted);
+
+
+font-size:15px;
+
+
+letter-spacing:.5px;
+
+
+}
+
+
+
+
+.status-value{
+
+
+font-size:34px;
+
+
+font-weight:700;
+
+
+margin-top:8px;
+
+
+}
+
+
+
+
+.on{
+
+    color:#22c55e !important;
+
+    text-shadow:
+    0 0 25px rgba(34,197,94,.9);
+
+    font-weight:700;
+
+}
+
+
+
+.off{
+
+    color:#ef4444 !important;
+
+    text-shadow:
+    0 0 25px rgba(239,68,68,.8);
+
+    font-weight:700;
+
+}
+
+
+
+
+/* ================= CONTROL ================= */
+
+
+
+.control-section{
+
+
+background:
+
+
+rgba(2,6,23,.45);
+
+
+
+padding:20px;
+
+
+border-radius:22px;
+
+
+
+margin-bottom:22px;
+
+
+
+}
+
+
+
+.control-section h3{
+
+
+color:#cbd5e1;
+
+
+margin-bottom:15px;
+
+
+font-size:18px;
+
+
+}
+
+
+
+
+/* BUTTON */
+
+
+.btn{
+
+
+padding:
+
+14px 24px;
+
+
+
+border:none;
+
+
+border-radius:18px;
+
+
+color:white;
+
+
+font-size:15px;
+
+
+font-weight:600;
+
+
+cursor:pointer;
+
+
+
+margin:6px;
+
+
+
+transition:.3s;
+
+
+box-shadow:
+
+
+0 10px 25px rgba(0,0,0,.25);
+
+
+
+}
+
+
+
+.btn:hover{
+
+
+transform:
+
+translateY(-5px)
+scale(1.05);
+
+
+}
+
+
+
+.green{
+
+
+background:
+
+linear-gradient(
+135deg,
+#22c55e,
+#15803d
+);
+
+
+
+}
+
+
+
+.red{
+
+
+background:
+
+linear-gradient(
+135deg,
+#ef4444,
+#991b1b
+);
+
+
+
+}
+
+
+
+.blue{
+
+
+background:
+
+linear-gradient(
+135deg,
+#38bdf8,
+#2563eb
+);
+
+
+
+}
+
+
+
+.gray{
+
+
+background:
+
+linear-gradient(
+135deg,
+#64748b,
+#334155
+);
+
+
+
+}
+
+
+
+.purple{
+
+
+background:
+
+linear-gradient(
+135deg,
+#a855f7,
+#6d28d9
+);
+
+
+
+}
+
+
+
+.orange{
+
+
+background:
+
+linear-gradient(
+135deg,
+#fb923c,
+#ea580c
+);
+
+
+
+}
+
+
+
+
+
+
+/* ================= ACK ================= */
+
+
+
+.ack-card{
+
+
+background:
+
+
+rgba(2,6,23,.9);
+
+
+
+border-radius:22px;
+
+
+padding:25px;
+
+
+line-height:2.2;
+
+
+
+border:
+
+1px solid rgba(255,255,255,.08);
+
+
+
+}
+
+
+
+.ack-card span{
+
+
+color:var(--primary);
+
+
+font-weight:600;
+
+
+
+}
+
+
+
+
+
+/* ================= OTA ================= */
+
+
+
+.progress-wrapper{
+
+
+height:30px;
+
+
+width:100%;
+
+
+background:#334155;
+
+
+border-radius:50px;
+
+
+overflow:hidden;
+
+
+}
+
+
+
+
+.progress-bar{
+
+
+height:100%;
+
+
+width:0%;
+
+
+background:
+
+
+linear-gradient(
+90deg,
+#2563eb,
+#38bdf8
+);
+
+
+
+display:flex;
+
+
+align-items:center;
+
+
+justify-content:center;
+
+
+
+font-weight:700;
+
+
+
+transition:.4s;
+
+
+}
+
+
+
+
+
+
+.upload-bar{
+
+
+background:
+
+
+linear-gradient(
+90deg,
+#22c55e,
+#4ade80
+);
+
+
+}
+
+
+
+
+input[type=file]{
+
+
+width:100%;
+
+
+padding:15px;
+
+
+background:#020617;
+
+
+border:
+
+1px solid #334155;
+
+
+border-radius:18px;
+
+
+color:white;
+
+
+margin:15px 0;
+
+
+
+}
+
+
+
+
+
+
+/* ================= INFO ================= */
+
+
+
+.info-row{
+
+
+display:flex;
+
+
+justify-content:space-between;
+
+
+padding:15px 0;
+
+
+
+border-bottom:
+
+1px solid rgba(255,255,255,.08);
+
+
+}
+
+
+
+.info-row:last-child{
+
+
+border:none;
+
+
+}
+
+
+
+
+
+/* FOOTER */
+
+
+.footer{
+
+
+margin-top:40px;
+
+
+text-align:center;
+
+
+color:var(--muted);
+
+
+font-size:14px;
+
+
+}
+
+
+
+
+
+/* MOBILE */
+
+
+@media(max-width:768px){
+
+
+body{
+
+
+padding:15px;
+
+
+}
+
+
+
+.header{
+
+
+flex-direction:column;
+
+
+gap:20px;
+
+
+text-align:center;
+
+
+}
+
+
+
+.header h1{
+
+
+font-size:28px;
+
+
+}
+
+
+.dashboard{
+
+flex-direction:column;
+
+}
+
+
+.card{
+
+width:100%;
+
+}
+
+.status-grid{
+
+
+grid-template-columns:1fr;
+
+
+}
+
+
+
+.btn{
+
+
+width:100%;
+
+
+margin-top:10px;
+
+
+}
+
+
+
+}
+
+/* ================= BLE BUTTON ================= */
+
+.ble-btn{
+
+padding:14px 28px;
+
+border:none;
+
+border-radius:20px;
+
+font-size:15px;
+
+font-weight:600;
+
+color:white;
+
+cursor:pointer;
+
+margin:8px;
+
+background:
+
+linear-gradient(
+135deg,
+#06b6d4,
+#2563eb
+);
+
+
+box-shadow:
+
+0 10px 30px rgba(6,182,212,.45);
+
+
+display:inline-flex;
+
+align-items:center;
+
+gap:10px;
+
+
+transition:.35s;
+
+
+border:
+
+1px solid rgba(255,255,255,.15);
+
+}
+
+
+
+.ble-btn:hover{
+
+
+transform:
+
+translateY(-5px)
+scale(1.06);
+
+
+box-shadow:
+
+0 20px 45px rgba(6,182,212,.7);
+
+
+}
+
+
+
+.ble-btn:active{
+
+
+transform:
+
+scale(.95);
+
+
+}
+
+
+
+/* BLE CONNECT ANIMATION */
+
+
+.ble-icon{
+
+
+font-size:22px;
+
+
+animation:
+
+bluetoothPulse 1.5s infinite;
+
+
+}
+
+
+
+@keyframes bluetoothPulse{
+
+
+50%{
+
+
+text-shadow:
+
+0 0 25px #38bdf8;
+
+
+transform:scale(1.2);
+
+
+}
+
+
+}
+
+
+</style>
+</head>
+
+<body>
+
+<div class="header">
+
+<h1>Smart IoT Dashboard</h1>
+
+<div class="device-status">
+<div class="online-dot"></div>
+<span id="system">ONLINE</span>
+</div>
+
+</div>
+
+<div class="dashboard">
+
+<!-- STATUS -->
+
+<div class="card device-card">
+
+<h2>⚙️ Device Status</h2>
+
+
+<div class="status-grid">
+
+
+<div class="status-box">
+
+<div class="icon">💡</div>
+
+<div class="status-title">
+Light
+</div>
+
+<div class="status-value on" id="light">
+ON
+</div>
+
+</div>
+
+
+
+<div class="status-box">
+
+<div class="icon">🌀</div>
+
+<div class="status-title">
+Fan
+</div>
+
+<div class="status-value off" id="fan">
+OFF
+</div>
+
+</div>
+
+
+
+
+<div class="status-box">
+
+<div class="icon">🚰</div>
+
+<div class="status-title">
+Pump
+</div>
+
+<div class="status-value off" id="pump">
+OFF
+</div>
+
+</div>
+
+
+
+
+<div class="status-box">
+
+<div class="icon">🌐</div>
+
+<div class="status-title">
+System
+</div>
+
+<div class="status-value online" id="system2">
+ONLINE
+</div>
+
+</div>
+
+
+</div>
+
+
+
+<div class="divider"></div>
+
+
+
+
+
+<div class="upload-box">
+
+
+<label class="file-label">
+
+Choose Firmware
+
+<input 
+type="file"
+id="firmwareFile"
+onchange="showFile()">
+
+</label>
+
+
+
+<div class="file-info">
+
+
+<p>
+📄 File :
+<span id="fileName">
+No file selected
+</span>
+
+</p>
+
+
+<p>
+
+📦 Size :
+<span id="fileSize">
+0 KB
+</span>
+
+</p>
+
+
+</div>
+
+
+
+<button
+class="btn blue"
+onclick="uploadFirmware()">
+
+🚀 Upload & Update
+
+</button>
+
+
+</div>
+
+
+
+<div class="progress-container">
+
+<div 
+id="otaBar"
+class="progress-bar">
+
+0%
+
+</div>
+
+</div>
+
+
+</div>
+
+
+<!-- CONTROLS -->
+
+<div class="card">
+
+<h2>Device Controls</h2>
+
+<div class="control-section">
+
+<h3>Light Control</h3>
+
+<button class="btn green" onclick="sendCommand('Left_light_on')">
+Light ON
+</button>
+
+<button class="btn red" onclick="sendCommand('Left_light_off')">
+Light OFF
+</button>
+
+</div>
+
+<div class="control-section">
+
+<h3>Fan Control</h3>
+
+<button class="btn blue" onclick="sendCommand('Left_fan_on')">
+Fan ON
+</button>
+
+<button class="btn gray" onclick="sendCommand('Left_fan_off')">
+Fan OFF
+</button>
+
+
+
+
+</div>
+
+<div class="control-section">
+
+<h3>Pump Control</h3>
+
+<button class="btn purple" onclick="sendCommand('Left_pump_on')">
+Pump ON
+</button>
+
+<button class="btn orange" onclick="sendCommand('Left_pump_off')">
+Pump OFF
+</button>
+
+</div>
+
+
+
+
+
+
+</div>
+
+<!-- ACK -->
+
+<div class="card">
+
+<h2>Latest Acknowledgement</h2>
+
+<div class="ack-card">
+
+<p><span>Device:</span> ESP32_001</p>
+
+<p><span>Command:</span>
+<span id="ack-command">Push</span>
+</p>
+
+<p><span>Result:</span>
+<span id="ack-result">SUCCESS</span>
+</p>
+
+<p><span>Light:</span>
+<span id="ack-light">ON</span>
+</p>
+
+<p><span>Fan:</span>
+<span id="ack-fan">OFF</span>
+</p>
+
+<p><span>Pump:</span>
+<span id="ack-pump">OFF</span>
+</p>
+
+</div>
+<button 
+class="ble-btn"
+onclick="openBLE()">
+
+<span class="ble-icon">📡</span>
+
+BLE Provisioning
+
+</button>
+
+<button
+class="btn orange"
+onclick="sendOTAUpdate()">
+Send OTA_UPDATE
+
+
+
+
+</button>
+
+</div>
+
+
+
+</div>
+
+</div>
+
+</div>
+
+<div class="footer">
+
+ESP32 • MQTT • Flask • OTA Ready Dashboard
+
+</div>
+
+<script>
+
+function sendCommand(command){
+
+fetch('/command',{
+method:'POST',
+headers:{
+'Content-Type':'application/json'
+},
+body:JSON.stringify({
+command:command
+})
+})
+.then(response=>response.json())
+.then(data=>{
+console.log(data);
+})
+.catch(error=>{
+console.error(error);
+});
+
+}
+
+function updateDashboard(data){
+
+
+let system =
+data.status.system || "OFFLINE";
+
+
+let light =
+data.status.light || "OFF";
+
+
+let fan =
+data.status.fan || "OFF";
+
+
+let pump =
+data.status.pump || "OFF";
+
+
+
+updateStatus(
+"system2",
+system
+);
+
+
+document.getElementById("system").innerText =
+system;
+
+
+
+updateStatus(
+"light",
+light
+);
+
+
+updateStatus(
+"fan",
+fan
+);
+
+
+updateStatus(
+"pump",
+pump
+);
+
+
+
+if(data.ack){
+
+document.getElementById("ack-command").innerText =
+data.ack.command || "--";
+
+
+document.getElementById("ack-result").innerText =
+data.ack.result || "--";
+
+
+document.getElementById("ack-light").innerText =
+data.ack.light || "--";
+
+
+document.getElementById("ack-fan").innerText =
+data.ack.fan || "--";
+
+
+document.getElementById("ack-pump").innerText =
+data.ack.pump || "--";
+
+
+}
+
+
+
+if(data.ota_progress !== undefined){
+
+document.getElementById("otaBar").style.width =
+data.ota_progress+"%";
+
+
+document.getElementById("otaBar").innerText =
+data.ota_progress+"%";
+
+
+}
+
+
+}
+// new 20
+function updateStatus(id,value){
+
+
+let element =
+document.getElementById(id);
+
+
+
+if(!element)
+return;
+
+
+
+element.innerText =
+value;
+
+
+
+if(value.toUpperCase()=="ON" ||
+value.toUpperCase()=="ONLINE"){
+
+
+element.className =
+"status-value on";
+
+
+}
+
+else{
+
+
+element.className =
+"status-value off";
+
+
+}
+
+
+}
+
+
+function loadStatus(){
+
+fetch('/status')
+.then(response=>response.json())
+.then(data=>{
+updateDashboard(data);
+})
+.catch(error=>{
+console.error(error);
+});
+
+}
+
+setInterval(loadStatus,1000);
+
+loadStatus();
+
+
+
+function uploadFirmware()
+{
+    let file =
+    document.getElementById(
+        "firmwareFile"
+    ).files[0];
+
+    if(!file)
+    {
+        alert(
+            "Select Firmware"
+        );
+        return;
+    }
+
+    let formData =
+    new FormData();
+
+    formData.append(
+        "file",
+        file
+    );
+
+    let xhr =
+    new XMLHttpRequest();
+
+    xhr.upload.addEventListener(
+        "progress",
+        function(e)
+        {
+            if(e.lengthComputable)
+            {
+                let percent =
+                Math.round(
+                    (e.loaded/e.total)*100
+                );
+
+                document
+                .getElementById(
+                    "uploadBar"
+                )
+                .style.width =
+                percent + "%";
+
+                document
+                .getElementById(
+                    "uploadBar"
+                )
+                .innerText =
+                percent + "%";
+            }
+        }
+    );
+
+    xhr.onload = function()
+    {
+        if(xhr.status == 200)
+        {
+            alert(
+                "FIrmware Uploaded SUccessfull. OTA Started."
+            )
+            sendCommand(
+                "OTA_UPDATE"
+            );
+        }
+    };
+
+    xhr.open(
+        "POST",
+        "/upload_firmware"
+    );
+
+    xhr.send(
+        formData
+    );
+}
+//new file size
+document
+.getElementById("firmwareFile")
+.addEventListener("change", function(){
+
+    let file = this.files[0];
+
+    if(file)
+    {
+        document.getElementById(
+            "fileName"
+        ).innerText = file.name;
+
+        document.getElementById(
+            "fileSize"
+        ).innerText =
+        (
+            file.size / 1024
+        ).toFixed(2) + " KB";
+    }
+});
+function sendOTAUpdate()
+{
+    sendCommand("OTA_UPDATE");
+}
+
+
+function openBLE() {
+    window.location.href = "/ble";
+}
+
+</script>
+
+</body>
+</html>

@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>BLE Provisioning</title>
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/ble.css') }}">
+</head>
+
+<body>
+
+<div class="container">
+
+    <!-- HEADER -->
+    <div class="header">
+        <div class="logo">📡</div>
+        <h1>ESP32 BLE Provisioning</h1>
+        <p class="subtitle">Connect & Configure Device</p>
+    </div>
+
+    <!-- SCAN -->
+    <button id="scanBtn">
+        🔍 Scan BLE Devices
+    </button>
+
+    <!-- DEVICE CARD -->
+    <div class="card">
+        <h3>Device Information</h3>
+
+        <div class="row">
+            <span class="label">Device Name</span>
+            <span id="deviceName" class="value">Not Connected</span>
+        </div>
+
+        <div class="row">
+            <span class="label">Status</span>
+            <span id="status" class="value disconnected">Disconnected</span>
+        </div>
+    </div>
+
+    <!-- WIFI CARD -->
+    <div class="card">
+        <h3>WiFi Credentials</h3>
+
+        <input type="text" id="ssid" placeholder="Enter WiFi SSID">
+
+        <input type="password" id="password" placeholder="Enter WiFi Password">
+
+        <button id="sendBtn">
+            🚀 Send Credentials
+        </button>
+        <button class="backBtn" onclick="history.back()">
+          ⬅ Back
+       </button>
+    </div>
+
+</div>
+
+<script src="{{ url_for('static', filename='js/ble.js') }}"></script>
+
+</body>
+</html>
