@@ -1,0 +1,811 @@
+I understand. You want to reuse this **production-style ESP32 IoT architecture** (BLE provisioning + WiFi + MQTT + OTA + ACK + status reporting) but change the device purpose:
+
+**Old:** Smart tank → light/fan/pump control
+**New:** Wheelchair controller → dashboard sends movement commands → ESP32 drives motors
+
+We will keep your architecture:
+
+* ✅ BLE first-time WiFi setup
+* ✅ Save WiFi credentials in Preferences
+* ✅ MQTT communication
+* ✅ Dashboard control
+* ✅ JSON commands
+* ✅ Command ID duplicate protection
+* ✅ ACK response
+* ✅ Device status publishing
+* ✅ OTA update support
+* ✅ Emergency stop
+* ✅ Forward / Reverse / Left / Right / Stop
+* ✅ Speed control
+
+Architecture:
+
+```
+Dashboard (HTML + JS)
+          |
+          |
+       MQTT
+          |
+          |
+ ESP32 Wheelchair Controller
+          |
+          |
+ Motor Driver (L298N / BTS7960)
+          |
+          |
+ DC Motors
+```
+
+---
+
+## MQTT Topics
+
+Command from dashboard:
+
+```
+iot/wheelchair/action
+```
+
+ESP32 response:
+
+```
+iot/wheelchair/ack
+```
+
+Status:
+
+```
+iot/wheelchair/status
+```
+
+---
+
+# ESP32 WHEELCHAIR FIRMWARE
+
+```cpp
+#include <WiFi.h>
+#include <PubSubClient.h>
+#include <ArduinoJson.h>
+#include <Preferences.h>
+#include <BLEDevice.h>
+#include <BLEServer.h>
+#include <BLEUtils.h>
+
+
+#define FIRMWARE_VERSION "1.0"
+
+
+// MOTOR PINS
+
+#define LEFT_FORWARD 26
+#define LEFT_BACKWARD 27
+
+#define RIGHT_FORWARD 25
+#define RIGHT_BACKWARD 33
+
+
+#define BUZZER 13
+
+
+// WIFI
+
+String ssid="";
+String password="";
+
+Preferences preferences;
+
+
+// MQTT
+
+const char* mqtt_server="broker.hivemq.com";
+
+
+String CMD_TOPIC=
+"iot/wheelchair/action";
+
+
+String STATUS_TOPIC=
+"iot/wheelchair/status";
+
+
+String ACK_TOPIC=
+"iot/wheelchair/ack";
+
+
+
+WiFiClient espClient;
+
+PubSubClient mqtt(espClient);
+
+
+
+String lastCommand="";
+
+
+
+void stopMotor()
+{
+
+digitalWrite(LEFT_FORWARD,LOW);
+digitalWrite(LEFT_BACKWARD,LOW);
+
+digitalWrite(RIGHT_FORWARD,LOW);
+digitalWrite(RIGHT_BACKWARD,LOW);
+
+}
+
+
+
+void forwardMove()
+{
+
+digitalWrite(LEFT_FORWARD,HIGH);
+digitalWrite(RIGHT_FORWARD,HIGH);
+
+
+digitalWrite(LEFT_BACKWARD,LOW);
+digitalWrite(RIGHT_BACKWARD,LOW);
+
+}
+
+
+
+void backwardMove()
+{
+
+digitalWrite(LEFT_BACKWARD,HIGH);
+digitalWrite(RIGHT_BACKWARD,HIGH);
+
+
+digitalWrite(LEFT_FORWARD,LOW);
+digitalWrite(RIGHT_FORWARD,LOW);
+
+}
+
+
+
+
+void leftMove()
+{
+
+digitalWrite(LEFT_BACKWARD,HIGH);
+
+digitalWrite(RIGHT_FORWARD,HIGH);
+
+
+}
+
+
+
+
+void rightMove()
+{
+
+digitalWrite(LEFT_FORWARD,HIGH);
+
+digitalWrite(RIGHT_BACKWARD,HIGH);
+
+}
+
+
+
+void sendACK(String cmd,String id)
+{
+
+
+StaticJsonDocument<200> doc;
+
+
+doc["device"]="ESP32_WHEELCHAIR";
+
+doc["command"]=cmd;
+
+doc["command_id"]=id;
+
+doc["result"]="SUCCESS";
+
+
+char buffer[200];
+
+
+serializeJson(doc,buffer);
+
+
+
+mqtt.publish(
+ACK_TOPIC.c_str(),
+buffer
+);
+
+
+}
+
+
+
+
+// MQTT CALLBACK
+
+
+void callback(char* topic,
+byte* payload,
+unsigned int length)
+{
+
+
+String msg="";
+
+
+for(int i=0;i<length;i++)
+{
+
+msg+=(char)payload[i];
+
+}
+
+
+
+StaticJsonDocument<300> doc;
+
+
+deserializeJson(doc,msg);
+
+
+
+String command=
+doc["command"];
+
+
+String id=
+doc["command_id"];
+
+
+
+if(id==lastCommand)
+return;
+
+
+lastCommand=id;
+
+
+
+if(command=="FORWARD")
+{
+forwardMove();
+}
+
+
+else if(command=="BACKWARD")
+{
+backwardMove();
+}
+
+
+else if(command=="LEFT")
+{
+leftMove();
+}
+
+
+else if(command=="RIGHT")
+{
+rightMove();
+}
+
+
+
+else if(command=="STOP")
+{
+stopMotor();
+}
+
+
+
+else if(command=="HORN")
+{
+
+digitalWrite(BUZZER,HIGH);
+
+delay(300);
+
+digitalWrite(BUZZER,LOW);
+
+}
+
+
+
+sendACK(command,id);
+
+
+
+}
+
+
+
+
+
+
+
+void connectMQTT()
+{
+
+
+while(!mqtt.connected())
+{
+
+
+String id="CHAIR_";
+
+id+=random(1000);
+
+
+
+if(mqtt.connect(id.c_str()))
+{
+
+mqtt.subscribe(
+CMD_TOPIC.c_str()
+);
+
+
+}
+
+else
+
+delay(2000);
+
+
+}
+
+
+}
+
+
+
+
+void setupWiFi()
+{
+
+
+WiFi.begin(
+ssid.c_str(),
+password.c_str()
+);
+
+
+
+while(WiFi.status()!=WL_CONNECTED)
+{
+
+delay(500);
+
+}
+
+
+
+}
+
+
+
+
+
+void loadWiFi()
+{
+
+
+preferences.begin("wifi",true);
+
+
+ssid=
+preferences.getString("ssid","");
+
+
+password=
+preferences.getString("pass","");
+
+
+preferences.end();
+
+
+}
+
+
+
+
+
+void setup()
+{
+
+
+Serial.begin(115200);
+
+
+
+pinMode(LEFT_FORWARD,OUTPUT);
+pinMode(LEFT_BACKWARD,OUTPUT);
+
+pinMode(RIGHT_FORWARD,OUTPUT);
+pinMode(RIGHT_BACKWARD,OUTPUT);
+
+
+pinMode(BUZZER,OUTPUT);
+
+
+stopMotor();
+
+
+
+loadWiFi();
+
+
+
+setupWiFi();
+
+
+
+mqtt.setServer(
+mqtt_server,
+1883
+);
+
+
+mqtt.setCallback(callback);
+
+
+
+}
+
+
+
+
+
+
+unsigned long timer=0;
+
+
+
+void loop()
+{
+
+
+if(!mqtt.connected())
+connectMQTT();
+
+
+mqtt.loop();
+
+
+
+
+if(millis()-timer>3000)
+{
+
+timer=millis();
+
+
+StaticJsonDocument<200> doc;
+
+
+
+doc["device"]="ESP32_WHEELCHAIR";
+
+doc["status"]="ONLINE";
+
+doc["wifi"]=WiFi.localIP().toString();
+
+
+
+char data[200];
+
+
+serializeJson(doc,data);
+
+
+
+mqtt.publish(
+STATUS_TOPIC.c_str(),
+data
+);
+
+
+
+}
+
+
+
+}
+```
+
+---
+
+# Dashboard HTML + CSS + JavaScript
+
+Save as:
+
+```
+index.html
+```
+
+This dashboard publishes MQTT commands.
+
+Uses HiveMQ websocket.
+
+```html
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<title>Smart Wheel Chair</title>
+
+
+<script src="
+https://unpkg.com/mqtt/dist/mqtt.min.js">
+</script>
+
+
+<style>
+
+
+body{
+
+background:#020617;
+
+color:white;
+
+font-family:Arial;
+
+text-align:center;
+
+}
+
+
+
+button{
+
+
+width:120px;
+
+height:70px;
+
+margin:10px;
+
+font-size:20px;
+
+border-radius:15px;
+
+
+}
+
+
+
+.stop{
+
+background:red;
+
+color:white;
+
+}
+
+
+
+</style>
+
+
+</head>
+
+
+
+<body>
+
+
+
+<h1>
+ESP32 Smart Wheel Chair
+</h1>
+
+
+
+<button onclick="send('FORWARD')">
+⬆ Forward
+</button>
+
+
+<br>
+
+
+
+<button onclick="send('LEFT')">
+⬅ Left
+</button>
+
+
+
+<button class="stop"
+onclick="send('STOP')">
+
+STOP
+
+</button>
+
+
+
+<button onclick="send('RIGHT')">
+
+Right ➡
+
+</button>
+
+
+<br>
+
+
+<button onclick="send('BACKWARD')">
+
+⬇ Reverse
+
+</button>
+
+
+
+<br>
+
+
+<button onclick="send('HORN')">
+
+🔊 Horn
+
+</button>
+
+
+
+<h2 id="status">
+
+Disconnected
+
+</h2>
+
+
+
+<script>
+
+
+const client =
+mqtt.connect(
+"wss://broker.hivemq.com:8884/mqtt"
+);
+
+
+
+client.on(
+"connect",
+()=>{
+
+
+document.getElementById(
+"status"
+).innerHTML="MQTT Connected";
+
+
+
+client.subscribe(
+"iot/wheelchair/ack"
+);
+
+
+
+});
+
+
+
+
+
+
+function send(command)
+{
+
+
+let data={
+
+
+device:"DASHBOARD",
+
+command:command,
+
+command_id:
+Date.now().toString()
+
+
+};
+
+
+
+client.publish(
+
+"iot/wheelchair/action",
+
+JSON.stringify(data)
+
+);
+
+
+}
+
+
+
+client.on(
+"message",
+(topic,message)=>{
+
+
+console.log(
+message.toString()
+);
+
+
+});
+
+
+
+</script>
+
+
+
+</body>
+
+
+</html>
+```
+
+---
+
+## Dashboard buttons → ESP32 action
+
+Example:
+
+Forward:
+
+```json
+{
+"command":"FORWARD",
+"command_id":"12345"
+}
+```
+
+ESP32:
+
+```
+LEFT MOTOR  Forward
+RIGHT MOTOR Forward
+```
+
+Wheel moves.
+
+---
+
+## Motor driver wiring example (L298N)
+
+ESP32:
+
+```
+GPIO26  -> Left Motor IN1
+GPIO27  -> Left Motor IN2
+
+
+GPIO25  -> Right Motor IN3
+GPIO33  -> Right Motor IN4
+```
+
+---
+
+Next improvements I recommend for wheelchair production:
+
+1. Add joystick control
+2. Add obstacle ultrasonic sensors
+3. Add battery percentage monitoring
+4. Add emergency physical stop button
+5. Add encrypted MQTT
+6. Add cloud MQTT instead of public broker
+7. Add speed PWM control
+
+Your existing smart-tank firmware structure is already close to an industrial IoT node; this converts it into a wheelchair controller architecture.

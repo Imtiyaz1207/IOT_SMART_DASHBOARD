@@ -1,0 +1,1418 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Smart Tank IoT Dashboard</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:'Poppins',sans-serif;
+}
+
+body{
+background:#0f172a;
+color:#f8fafc;
+padding:25px;
+min-height:100vh;
+}
+
+.header{
+display:flex;
+justify-content:space-between;
+align-items:center;
+margin-bottom:25px;
+padding:20px;
+background:#1e293b;
+border-radius:16px;
+box-shadow:0 4px 15px rgba(0,0,0,.3);
+}
+
+.header h1{
+font-size:30px;
+font-weight:700;
+}
+
+.device-status{
+display:flex;
+align-items:center;
+gap:10px;
+font-weight:600;
+}
+
+.online-dot{
+width:12px;
+height:12px;
+border-radius:50%;
+background:#22c55e;
+box-shadow:0 0 10px #22c55e;
+}
+
+.dashboard{
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(320px,1fr));
+gap:20px;
+}
+
+.card{
+background:#1e293b;
+border-radius:16px;
+padding:20px;
+box-shadow:0 4px 15px rgba(0,0,0,.3);
+}
+
+.card h2{
+margin-bottom:20px;
+font-size:22px;
+color:#38bdf8;
+}
+
+.status-grid{
+display:grid;
+grid-template-columns:repeat(2,1fr);
+gap:15px;
+}
+
+.status-box{
+background:#0f172a;
+padding:20px;
+border-radius:12px;
+text-align:center;
+border:1px solid #334155;
+}
+
+.status-title{
+font-size:14px;
+color:#94a3b8;
+margin-bottom:10px;
+}
+
+.status-value{
+font-size:28px;
+font-weight:700;
+}
+
+.on{
+color:#22c55e;
+}
+
+.off{
+color:#ef4444;
+}
+
+.info-row{
+display:flex;
+justify-content:space-between;
+padding:10px 0;
+border-bottom:1px solid #334155;
+}
+
+.info-row:last-child{
+border-bottom:none;
+}
+
+.control-section{
+margin-bottom:25px;
+}
+
+.control-section h3{
+margin-bottom:10px;
+color:#cbd5e1;
+}
+
+.btn{
+padding:12px 20px;
+border:none;
+border-radius:10px;
+cursor:pointer;
+font-weight:600;
+margin:5px;
+transition:.3s;
+}
+
+.btn:hover{
+transform:translateY(-2px);
+}
+
+.green{
+background:#22c55e;
+color:white;
+}
+
+.red{
+background:#ef4444;
+color:white;
+}
+
+.blue{
+background:#3b82f6;
+color:white;
+}
+
+.gray{
+background:#64748b;
+color:white;
+}
+
+.purple{
+background:#8b5cf6;
+color:white;
+}
+
+.orange{
+background:#f97316;
+color:white;
+}
+
+.ack-card{
+background:#0f172a;
+padding:15px;
+border-radius:10px;
+line-height:2;
+}
+
+.ack-card span{
+color:#38bdf8;
+font-weight:600;
+}
+
+.history-table{
+width:100%;
+border-collapse:collapse;
+margin-top:10px;
+}
+
+.history-table th,
+.history-table td{
+padding:10px;
+text-align:left;
+border-bottom:1px solid #334155;
+}
+
+.history-table th{
+color:#38bdf8;
+}
+
+.footer{
+text-align:center;
+margin-top:30px;
+color:#94a3b8;
+font-size:14px;
+}
+
+@media(max-width:768px){
+
+.header{
+flex-direction:column;
+gap:10px;
+text-align:center;
+}
+
+.status-grid{
+grid-template-columns:1fr;
+}
+
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="header">
+
+<h1>Smart Tank IoT Dashboard</h1>
+
+<div class="device-status">
+<div class="online-dot"></div>
+<span id="system">ONLINE</span>
+</div>
+
+</div>
+
+<div class="dashboard">
+
+<!-- STATUS -->
+
+<div class="card">
+
+<h2>Device Status</h2>
+
+<hr>
+
+<h3>Firmware Update</h3>
+
+<input
+type="file"
+id="firmwareFile">
+
+<br><br>
+
+<button
+class="btn blue"
+onclick="uploadFirmware()">
+
+Upload & Update
+
+</button>
+
+<hr>
+
+<div class="status-grid">
+
+<div class="status-box">
+<div class="status-title">Light</div>
+<div class="status-value on" id="light">ON</div>
+</div>
+
+<div class="status-box">
+<div class="status-title">Fan</div>
+<div class="status-value off" id="fan">OFF</div>
+</div>
+
+<div class="status-box">
+<div class="status-title">Pump</div>
+<div class="status-value off" id="pump">OFF</div>
+</div>
+
+<div class="status-box">
+<div class="status-title">System</div>
+<div class="status-value on" id="system2">ONLINE</div>
+</div>
+
+</div>
+
+</div>
+
+<!-- DEVICE INFO -->
+
+<div class="card">
+<!---
+<h2>Device Information</h2>
+
+<div class="info-row">
+<span>Device ID</span>
+<span>ESP32_001</span>
+</div>
+
+<div class="info-row">
+<span>Firmware</span>
+<span>v1.0.0</span>
+</div>
+
+<div class="info-row">
+<span>MQTT Broker</span>
+<span>HiveMQ</span>
+</div>
+
+<div class="info-row">
+<span>Connection</span>
+<span style="color:#22c55e;">Connected</span>
+</div>
+
+</div>
+-->
+<!-- CONTROLS -->
+
+<div class="card">
+
+<h2>Device Controls</h2>
+
+<div class="control-section">
+
+<h3>Light Control</h3>
+
+<button class="btn green" onclick="sendCommand('Push')">
+Light ON
+</button>
+
+<button class="btn red" onclick="sendCommand('Pull')">
+Light OFF
+</button>
+
+</div>
+
+<div class="control-section">
+
+<h3>Fan Control</h3>
+
+<button class="btn blue" onclick="sendCommand('Rotate')">
+Fan ON
+</button>
+
+<button class="btn gray" onclick="sendCommand('Lift')">
+Fan OFF
+</button>
+
+</div>
+
+<div class="control-section">
+
+<h3>Pump Control</h3>
+
+<button class="btn purple" onclick="sendCommand('Left')">
+Pump ON
+</button>
+
+<button class="btn orange" onclick="sendCommand('Right')">
+Pump OFF
+</button>
+
+</div>
+
+</div>
+
+<!-- ACK -->
+
+<div class="card">
+
+<h2>Latest Acknowledgement</h2>
+
+<div class="ack-card">
+
+<p><span>Device:</span> ESP32_001</p>
+
+<p><span>Command:</span>
+<span id="ack-command">Push</span>
+</p>
+
+<p><span>Result:</span>
+<span id="ack-result">SUCCESS</span>
+</p>
+
+<p><span>Light:</span>
+<span id="ack-light">ON</span>
+</p>
+
+<p><span>Fan:</span>
+<span id="ack-fan">OFF</span>
+</p>
+
+<p><span>Pump:</span>
+<span id="ack-pump">OFF</span>
+</p>
+
+</div>
+
+</div>
+
+<!-- HISTORY 
+
+<div class="card">
+
+<h2>Command History</h2>
+
+<table class="history-table">
+
+<thead>
+
+<tr>
+<th>Time</th>
+<th>Command</th>
+<th>Status</th>
+</tr>
+
+</thead>
+
+<tbody id="history">
+
+<tr>
+<td>10:15:22</td>
+<td>Push</td>
+<td>SUCCESS</td>
+</tr>
+
+<tr>
+<td>10:15:30</td>
+<td>Rotate</td>
+<td>SUCCESS</td>
+</tr>
+
+</tbody>
+
+</table>
+-->
+</div>
+
+</div>
+
+<div class="footer">
+
+ESP32 • MQTT • Flask • PostgreSQL • OTA Ready Dashboard
+
+</div>
+
+<script>
+
+function sendCommand(command){
+
+fetch('/command',{
+method:'POST',
+headers:{
+'Content-Type':'application/json'
+},
+body:JSON.stringify({
+command:command
+})
+})
+.then(response=>response.json())
+.then(data=>{
+console.log(data);
+})
+.catch(error=>{
+console.error(error);
+});
+
+}
+
+function updateDashboard(data){
+
+document.getElementById("system").innerText =
+data.status.system || "OFFLINE";
+
+document.getElementById("system2").innerText =
+data.status.system || "OFFLINE";
+
+document.getElementById("light").innerText =
+data.status.light || "OFF";
+
+document.getElementById("fan").innerText =
+data.status.fan || "OFF";
+
+document.getElementById("pump").innerText =
+data.status.pump || "OFF";
+
+if(data.ack){
+
+document.getElementById("ack-command").innerText =
+data.ack.command || "--";
+
+document.getElementById("ack-result").innerText =
+data.ack.result || "--";
+
+document.getElementById("ack-light").innerText =
+data.ack.light || "--";
+
+document.getElementById("ack-fan").innerText =
+data.ack.fan || "--";
+
+document.getElementById("ack-pump").innerText =
+data.ack.pump || "--";
+
+}
+
+}
+
+function loadStatus(){
+
+fetch('/status')
+.then(response=>response.json())
+.then(data=>{
+updateDashboard(data);
+})
+.catch(error=>{
+console.error(error);
+});
+
+}
+
+setInterval(loadStatus,1000);
+
+loadStatus();
+
+
+
+function uploadFirmware()
+{
+    let file =
+    document.getElementById(
+        "firmwareFile"
+    ).files[0];
+
+    if(!file)
+    {
+        alert(
+            "Please Select firmware.bin"
+        );
+        return;
+    }
+
+    let formData =
+    new FormData();
+
+    formData.append(
+        "file",
+        file
+    );
+
+    fetch(
+        "/upload_firmware",
+        {
+            method:"POST",
+            body:formData
+        }
+    )
+    .then(response=>response.json())
+    .then(data=>{
+
+        alert(
+            "Firmware Uploaded Successfully"
+        );
+
+        sendCommand(
+            "OTA_UPDATE"
+        );
+
+    })
+    .catch(error=>{
+        console.error(error);
+    });
+}
+
+
+
+
+
+
+
+
+
+
+</script>
+
+</body>
+</html>
+
+
+
+//20/6/working
+
+
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Smart Tank IoT Dashboard</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+
+:root{
+    --bg:#0b1120;
+    --card:#111827cc;
+    --border:rgba(255,255,255,.08);
+    --primary:#38bdf8;
+    --success:#22c55e;
+    --danger:#ef4444;
+    --warning:#f97316;
+    --purple:#8b5cf6;
+    --text:#f8fafc;
+    --muted:#94a3b8;
+}
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:'Poppins',sans-serif;
+}
+
+body{
+    background:
+    radial-gradient(circle at top left,#1e3a8a 0%,transparent 30%),
+    radial-gradient(circle at top right,#7c3aed 0%,transparent 25%),
+    #020617;
+    color:var(--text);
+    min-height:100vh;
+    padding:25px;
+}
+
+.header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:25px;
+    margin-bottom:25px;
+
+    backdrop-filter:blur(20px);
+    background:rgba(15,23,42,.75);
+
+    border:1px solid var(--border);
+    border-radius:24px;
+
+    box-shadow:
+    0 8px 32px rgba(0,0,0,.4);
+}
+
+.header h1{
+    font-size:34px;
+    font-weight:700;
+    letter-spacing:.5px;
+}
+
+.device-status{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    font-weight:600;
+}
+
+.online-dot{
+    width:12px;
+    height:12px;
+    border-radius:50%;
+    background:var(--success);
+
+    animation:pulse 1.5s infinite;
+}
+
+@keyframes pulse{
+    0%{
+        box-shadow:0 0 0 0 rgba(34,197,94,.7);
+    }
+    70%{
+        box-shadow:0 0 0 12px rgba(34,197,94,0);
+    }
+    100%{
+        box-shadow:0 0 0 0 rgba(34,197,94,0);
+    }
+}
+
+.dashboard{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(360px,1fr));
+    gap:22px;
+}
+
+.card{
+    backdrop-filter:blur(20px);
+    background:rgba(15,23,42,.75);
+
+    border:1px solid var(--border);
+
+    border-radius:24px;
+    padding:24px;
+
+    transition:.3s;
+}
+
+.card:hover{
+    transform:translateY(-5px);
+    box-shadow:
+    0 15px 40px rgba(0,0,0,.35);
+}
+
+.card h2{
+    margin-bottom:20px;
+    color:var(--primary);
+    font-size:24px;
+}
+
+.status-grid{
+    display:grid;
+    grid-template-columns:repeat(2,1fr);
+    gap:15px;
+}
+
+.status-box{
+    background:#020617;
+    border:1px solid rgba(255,255,255,.05);
+
+    border-radius:18px;
+    padding:25px;
+    text-align:center;
+}
+
+.status-title{
+    color:var(--muted);
+    font-size:14px;
+    margin-bottom:10px;
+}
+
+.status-value{
+    font-size:30px;
+    font-weight:700;
+}
+
+.on{
+    color:var(--success);
+    text-shadow:0 0 20px rgba(34,197,94,.5);
+}
+
+.off{
+    color:var(--danger);
+    text-shadow:0 0 20px rgba(239,68,68,.4);
+}
+
+.info-row{
+    display:flex;
+    justify-content:space-between;
+    padding:14px 0;
+    border-bottom:1px solid rgba(255,255,255,.05);
+}
+
+.info-row:last-child{
+    border:none;
+}
+
+.control-section{
+    margin-bottom:25px;
+}
+
+.control-section h3{
+    margin-bottom:12px;
+    color:#cbd5e1;
+}
+
+.btn{
+    border:none;
+    padding:12px 20px;
+    border-radius:14px;
+
+    color:white;
+    font-weight:600;
+    cursor:pointer;
+
+    transition:.3s;
+    margin:5px;
+}
+
+.btn:hover{
+    transform:translateY(-3px);
+}
+
+.green{
+    background:linear-gradient(
+    135deg,#22c55e,#16a34a);
+}
+
+.red{
+    background:linear-gradient(
+    135deg,#ef4444,#dc2626);
+}
+
+.blue{
+    background:linear-gradient(
+    135deg,#3b82f6,#2563eb);
+}
+
+.gray{
+    background:linear-gradient(
+    135deg,#64748b,#475569);
+}
+
+.purple{
+    background:linear-gradient(
+    135deg,#8b5cf6,#7c3aed);
+}
+
+.orange{
+    background:linear-gradient(
+    135deg,#f97316,#ea580c);
+}
+
+.ack-card{
+    background:#020617;
+    padding:18px;
+    border-radius:16px;
+    line-height:2;
+}
+
+.ack-card span{
+    color:var(--primary);
+    font-weight:600;
+}
+
+.progress-wrapper{
+    width:100%;
+    background:#334155;
+    border-radius:50px;
+    overflow:hidden;
+}
+
+.progress-bar{
+    width:0%;
+    height:26px;
+    background:linear-gradient(
+    90deg,
+    #3b82f6,
+    #38bdf8);
+
+    text-align:center;
+    line-height:26px;
+    font-weight:600;
+    transition:.4s;
+}
+
+.upload-bar{
+    background:linear-gradient(
+    90deg,
+    #22c55e,
+    #4ade80);
+}
+
+input[type=file]{
+    width:100%;
+    padding:12px;
+    border-radius:12px;
+    background:#020617;
+    color:white;
+    border:1px solid #334155;
+    margin:12px 0;
+}
+
+.footer{
+    text-align:center;
+    margin-top:30px;
+    color:var(--muted);
+}
+
+hr{
+    border:none;
+    height:1px;
+    background:#334155;
+    margin:20px 0;
+}
+
+@media(max-width:768px){
+
+    .header{
+        flex-direction:column;
+        text-align:center;
+        gap:15px;
+    }
+
+    .status-grid{
+        grid-template-columns:1fr;
+    }
+
+    .dashboard{
+        grid-template-columns:1fr;
+    }
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="header">
+
+<h1>Smart Tank IoT Dashboard</h1>
+
+<div class="device-status">
+<div class="online-dot"></div>
+<span id="system">ONLINE</span>
+</div>
+
+</div>
+
+<div class="dashboard">
+
+<!-- STATUS -->
+
+<div class="card">
+
+<h2>Device Status</h2>
+
+<hr>
+
+<h3>Firmware Update</h3>
+
+<input
+type="file"
+id="firmwareFile">
+
+<p>
+File:
+<span id="fileName">No file selected</span>
+</p>
+
+<p>
+Size:
+<span id="fileSize">0 KB</span>
+</p>
+
+<br><br>
+
+<button
+class="btn blue"
+onclick="uploadFirmware()">
+
+Upload & Update
+
+</button>
+
+<h3>OTA Progress</h3>
+
+<div style="
+width:100%;
+background:#334155;
+border-radius:10px;
+">
+
+<div id="otaBar"
+style="
+width:0%;
+height:25px;
+background:#3b82f6;
+text-align:center;
+line-height:25px;
+border-radius:10px;
+">
+
+0%
+
+</div>
+
+</div>
+
+
+<hr>
+
+<div class="status-grid">
+
+<div class="status-box">
+<div class="status-title">Light</div>
+<div class="status-value on" id="light">ON</div>
+</div>
+
+<div class="status-box">
+<div class="status-title">Fan</div>
+<div class="status-value off" id="fan">OFF</div>
+</div>
+
+<div class="status-box">
+<div class="status-title">Pump</div>
+<div class="status-value off" id="pump">OFF</div>
+</div>
+
+<div class="status-box">
+<div class="status-title">System</div>
+<div class="status-value on" id="system2">ONLINE</div>
+</div>
+
+</div>
+
+</div>
+
+<!-- DEVICE INFO 
+
+<div class="card">
+
+<h2>Device Information</h2>
+
+<div class="info-row">
+<span>Device ID</span>
+<span>ESP32_001</span>
+</div>
+
+<div class="info-row">
+<span>Firmware</span>
+<span>v1.0.0</span>
+</div>
+
+<div class="info-row">
+<span>MQTT Broker</span>
+<span>HiveMQ</span>
+</div>
+
+<div class="info-row">
+<span>Connection</span>
+<span style="color:#22c55e;">Connected</span>
+</div>
+
+</div>
+-->
+<!-- CONTROLS -->
+
+<div class="card">
+
+<h2>Device Controls</h2>
+
+<div class="control-section">
+
+<h3>Light Control</h3>
+
+<button class="btn green" onclick="sendCommand('Left_light_on')">
+Light ON
+</button>
+
+<button class="btn red" onclick="sendCommand('Left_light_off')">
+Light OFF
+</button>
+
+</div>
+
+<div class="control-section">
+
+<h3>Fan Control</h3>
+
+<button class="btn blue" onclick="sendCommand('Left_fan_on')">
+Fan ON
+</button>
+
+<button class="btn gray" onclick="sendCommand('Left_fan_off')">
+Fan OFF
+</button>
+
+
+
+
+</div>
+
+<div class="control-section">
+
+<h3>Pump Control</h3>
+
+<button class="btn purple" onclick="sendCommand('Left_pump_on')">
+Pump ON
+</button>
+
+<button class="btn orange" onclick="sendCommand('Left_pump_off')">
+Pump OFF
+</button>
+
+</div>
+
+<button
+class="btn orange"
+onclick="sendOTAUpdate()">
+Send OTA_UPDATE
+</button>
+
+
+
+
+
+
+
+</div>
+
+<!-- ACK -->
+
+<div class="card">
+
+<h2>Latest Acknowledgement</h2>
+
+<div class="ack-card">
+
+<p><span>Device:</span> ESP32_001</p>
+
+<p><span>Command:</span>
+<span id="ack-command">Push</span>
+</p>
+
+<p><span>Result:</span>
+<span id="ack-result">SUCCESS</span>
+</p>
+
+<p><span>Light:</span>
+<span id="ack-light">ON</span>
+</p>
+
+<p><span>Fan:</span>
+<span id="ack-fan">OFF</span>
+</p>
+
+<p><span>Pump:</span>
+<span id="ack-pump">OFF</span>
+</p>
+
+</div>
+
+</div>
+
+<!---
+<div
+style="
+width:100%;
+background:#334155;
+border-radius:10px;
+margin-top:10px;
+">
+
+<div
+id="uploadBar"
+style="
+width:0%;
+height:25px;
+background:#22c55e;
+border-radius:10px;
+text-align:center;
+line-height:25px;
+">
+0%
+</div>
+-->
+</div>
+
+
+
+
+<!-- HISTORY 
+
+<div class="card">
+
+<h2>Command History</h2>
+
+<table class="history-table">
+
+<thead>
+
+<tr>
+<th>Time</th>
+<th>Command</th>
+<th>Status</th>
+</tr>
+
+</thead>
+
+<tbody id="history">
+
+<tr>
+<td>10:15:22</td>
+<td>Push</td>
+<td>SUCCESS</td>
+</tr>
+
+<tr>
+<td>10:15:30</td>
+<td>Rotate</td>
+<td>SUCCESS</td>
+</tr>
+
+</tbody>
+
+</table>
+-->
+</div>
+
+</div>
+
+<div class="footer">
+
+ESP32 • MQTT • Flask • PostgreSQL • OTA Ready Dashboard
+
+</div>
+
+<script>
+
+function sendCommand(command){
+
+fetch('/command',{
+method:'POST',
+headers:{
+'Content-Type':'application/json'
+},
+body:JSON.stringify({
+command:command
+})
+})
+.then(response=>response.json())
+.then(data=>{
+console.log(data);
+})
+.catch(error=>{
+console.error(error);
+});
+
+}
+
+function updateDashboard(data){
+
+document.getElementById("system").innerText =
+data.status.system || "OFFLINE";
+
+document.getElementById("system2").innerText =
+data.status.system || "OFFLINE";
+
+document.getElementById("light").innerText =
+data.status.light || "OFF";
+
+document.getElementById("fan").innerText =
+data.status.fan || "OFF";
+
+document.getElementById("pump").innerText =
+data.status.pump || "OFF";
+
+if(data.ack){
+
+document.getElementById("ack-command").innerText =
+data.ack.command || "--";
+
+document.getElementById("ack-result").innerText =
+data.ack.result || "--";
+
+document.getElementById("ack-light").innerText =
+data.ack.light || "--";
+
+document.getElementById("ack-fan").innerText =
+data.ack.fan || "--";
+
+document.getElementById("ack-pump").innerText =
+data.ack.pump || "--";
+
+}
+if(data.ota_progress !== undefined)
+{
+    document
+    .getElementById("otaBar")
+    .style.width =
+    data.ota_progress + "%";
+
+    document
+    .getElementById("otaBar")
+    .innerText =
+    data.ota_progress + "%";
+}
+}
+
+function loadStatus(){
+
+fetch('/status')
+.then(response=>response.json())
+.then(data=>{
+updateDashboard(data);
+})
+.catch(error=>{
+console.error(error);
+});
+
+}
+
+setInterval(loadStatus,1000);
+
+loadStatus();
+
+
+
+function uploadFirmware()
+{
+    let file =
+    document.getElementById(
+        "firmwareFile"
+    ).files[0];
+
+    if(!file)
+    {
+        alert(
+            "Select Firmware"
+        );
+        return;
+    }
+
+    let formData =
+    new FormData();
+
+    formData.append(
+        "file",
+        file
+    );
+
+    let xhr =
+    new XMLHttpRequest();
+
+    xhr.upload.addEventListener(
+        "progress",
+        function(e)
+        {
+            if(e.lengthComputable)
+            {
+                let percent =
+                Math.round(
+                    (e.loaded/e.total)*100
+                );
+
+                document
+                .getElementById(
+                    "uploadBar"
+                )
+                .style.width =
+                percent + "%";
+
+                document
+                .getElementById(
+                    "uploadBar"
+                )
+                .innerText =
+                percent + "%";
+            }
+        }
+    );
+
+    xhr.onload = function()
+    {
+        if(xhr.status == 200)
+        {
+            alert(
+                "FIrmware Uploaded SUccessfull. OTA Started."
+            )
+            sendCommand(
+                "OTA_UPDATE"
+            );
+        }
+    };
+
+    xhr.open(
+        "POST",
+        "/upload_firmware"
+    );
+
+    xhr.send(
+        formData
+    );
+}
+//new file size
+document
+.getElementById("firmwareFile")
+.addEventListener("change", function(){
+
+    let file = this.files[0];
+
+    if(file)
+    {
+        document.getElementById(
+            "fileName"
+        ).innerText = file.name;
+
+        document.getElementById(
+            "fileSize"
+        ).innerText =
+        (
+            file.size / 1024
+        ).toFixed(2) + " KB";
+    }
+});
+function sendOTAUpdate()
+{
+    sendCommand("OTA_UPDATE");
+}
+
+
+
+
+
+
+
+
+</script>
+
+</body>
+</html>
