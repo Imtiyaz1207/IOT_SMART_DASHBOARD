@@ -42,6 +42,10 @@ def on_message(client, userdata, msg):
         data = json.loads(msg.payload.decode())
 
         if msg.topic == STATUS_TOPIC:
+            print(
+                "STATUS RECEIVED",
+                data
+            )
             device_status = data
             global last_seen # new 20/6
             last_seen = time.time()
@@ -61,14 +65,30 @@ def on_message(client, userdata, msg):
     except Exception as e:
         print(e)
 
-mqtt_client = mqtt.Client()
+#mqtt_client = mqtt.Client()
 
+mqtt_client = mqtt.Client(
+    mqtt.CallbackAPIVersion.VERSION1
+)
 mqtt_client.on_connect = on_connect
 mqtt_client.on_message = on_message
 
-mqtt_client.connect(MQTT_BROKER, MQTT_PORT, 60)
-mqtt_client.loop_start()
+'''mqtt_client.connect(MQTT_BROKER, MQTT_PORT, 60)
+mqtt_client.loop_start()'''
 
+try:
+    mqtt_client.connect(
+        MQTT_BROKER,
+        MQTT_PORT,
+        60
+    )
+
+    mqtt_client.loop_start()
+
+    print("MQTT STARTED")
+
+except Exception as e:
+    print("MQTT ERROR:", e)
 # ---------------- Routes ----------------
 
 @app.route('/')
